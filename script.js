@@ -1,6 +1,5 @@
 let employees = [];
 let currentEditId = null;
-let edit
 document.addEventListener("DOMContentLoaded", function() {
   let currentpage = 1; 
   let rowsPerPage = 5; 
@@ -85,6 +84,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Clear existing pagination
     paginationContainer.innerHTML = '';
+// Create first button
+const firstButton = document.createElement("button");
+firstButton.classList.add("pagination-button");
+firstButton.textContent = "First";
+firstButton.disabled = currentpage === 1;
+firstButton.addEventListener("click", () => {
+  currentpage = 1;
+  fetchdata();
+});
+paginationContainer.appendChild(firstButton);
 
     // Create previous button
     const prevButton = document.createElement("button");
@@ -99,20 +108,46 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     paginationContainer.appendChild(prevButton);
 
-    // Create page buttons
-    for (let i = 1; i <= totalPages; i++) {
-      const pageButton = document.createElement("button");
-      pageButton.classList.add("pagination-button");
-      pageButton.textContent = i;
-      pageButton.addEventListener("click", () => {
-        currentpage = i;
-        fetchdata();
-      });
-      if (i === currentpage) {
-        pageButton.classList.add("active");
-      }
-      paginationContainer.appendChild(pageButton);
+    // Helper function to create a page button
+  function createPageButton(pageNum) {
+    const pageButton = document.createElement("button");
+    pageButton.classList.add("pagination-button");
+    pageButton.textContent = pageNum;
+    pageButton.addEventListener("click", () => {
+      currentpage = pageNum;
+      fetchdata();
+    });
+    if (pageNum === currentpage) {
+      pageButton.classList.add("active");
     }
+    paginationContainer.appendChild(pageButton);
+  }
+
+  // Define the range of pages to display
+  const maxPagesToShow = 5;
+  const halfRange = Math.floor(maxPagesToShow / 2);
+
+  let startPage = Math.max(1, currentpage - halfRange);
+  let endPage = Math.min(totalPages, currentpage + halfRange);
+
+  if (startPage > 1) {
+    createPageButton(1); // Always show the first page
+    if (startPage > 2) {
+      paginationContainer.appendChild(document.createElement("span")).textContent = "...";
+    }
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    createPageButton(i);
+  }
+
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      paginationContainer.appendChild(document.createElement("span")).textContent = "...";
+    }
+    createPageButton(totalPages); // Always show the last page
+  }
+    
 
     // Create next button
     const nextButton = document.createElement("button");
@@ -127,6 +162,19 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     paginationContainer.appendChild(nextButton);
   }
+
+  
+   // Create last button
+  //  const lastButton = document.createElement("button");
+  //  lastButton.classList.add("pagination-button");
+  //  lastButton.textContent = "Last";
+  //  lastButton.disabled = currentpage === totalPages;
+  //  lastButton.addEventListener("click", () => {
+  //    currentpage = totalPages;
+  //    fetchdata();
+  //  });
+  //  paginationContainer.appendChild(lastButton);
+ 
 
   // Event listener for changing rows per page from dropdown
   paginationSelect.addEventListener("change", function() {

@@ -25,7 +25,7 @@
         <h4 class="logo">Employee <span class="light"> Management</span></h4>
         <div class="box">
           <ul>
-            <li><a class="line"><i class="fa-solid fa-house"></i>Dashboard</a></li>
+            <li><a href="#" class="line" onclick="redirectToDashboard()"><i class="fa-solid fa-house"></i>Dashboard</a></li>
             <li><a class="line"><span class="material-symbols-outlined">
                   equalizer
                 </span>Employees</p>
@@ -124,7 +124,7 @@
                         </div>
                     </div>
                     <div class="view_button mb-4 pb-5">
-                      <button type="button" id="delete"  class="btn  del" onclick="deleteEmployee('${element.id}')" >Delete</button>
+                      <button type="button" id="delete"  class="btn  del"  >Delete</button>
                       <button class="btn butn"   onclick="openEditModal('${element.id}')">Edit Details</button>
                   </div>
                 </div>
@@ -293,7 +293,7 @@
     </form>
     
     <!-- delete -->
-<div class="modal fade" id="modalDelete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="viewModalDelete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header border-bottom-0 ">
@@ -305,7 +305,7 @@
       </div>
       <div class="modal-footer border-top-0">
         <button type="button" class="btn btn-secondary butn" data-bs-dismiss="modal">Close</button>
-        <button type="button" id="deleteEmployee" class=" btn btn-primary delete"onclick="deleteEmployee()">Delete</button>        
+        <button type="button" id="deleteEmployee" class=" btn btn-primary delete" onclick="deleteEmploye('${element.id}')">Delete</button>        
       </div>
     </div>
   </div>

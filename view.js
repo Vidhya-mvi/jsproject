@@ -81,9 +81,9 @@ function detailsEmployee(employeeId) {
        `;
 
       // Add event listeners for delete and edit buttons
-      // document.getElementById("delete_btn").addEventListener("click", () => {
-      //   deleteEmployee(employee.id);
-      // });
+      document.getElementById("delete_btn").addEventListener("click", () => {
+        conformdelete()
+      });
 
     //   document.getElementById("edit_btn").addEventListener("click", () => {
     //     openEditModal(employee);
@@ -103,20 +103,33 @@ function calculateAge(dateOfBirth) {
 }
 
 // // Delete employee
-// function deleteEmployee(employeeId) {
-//   if (confirm("Are you sure you want to delete this employee?")) {
-//     fetch(`http://localhost:3000/employees/${employeeId}`, {
-//       method: "DELETE",
-//     })
-//       .then((response) => {
-//         if (response.ok) {
-//           alert("Employee deleted successfully!");
-//           window.location.href = "/employees.html"; 
-//         } else {
-//           alert("Error deleting employee!");
-//         }
-//       })
-//       .catch((error) => console.error("Error:", error));
-//   }
-// }
+function conformdelete(){
+const deleteModalElement = document.getElementById('viewModalDelete');
+console.log(deleteModalElement);
 
+const deleteModal = new bootstrap.Modal(deleteModalElement);
+deleteModal.show();
+
+// // Find the confirmation button within the modal after it's shown
+// const confirmDeleteBtn = document.getElementById('deleteEmploye');
+}
+function deleteEmploye(employeeId) {
+  // if (confirm("Are you sure you want to delete this employee?")) {
+    fetch(`http://localhost:3000/employees/${employeeId}`, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        if (response.ok) {
+          window.location.href = "employees.html"; 
+        } else {
+          alert("Error deleting employee!");
+        }
+      })
+      .catch((error) => console.error("Error:", error));
+  // }
+}
+
+
+function redirectToDashboard() {
+  window.location.href = 'index.html'; 
+}
