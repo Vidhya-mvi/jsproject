@@ -1,53 +1,143 @@
 let employees = [];
 let currentEditId = null;
+let edit
+document.addEventListener("DOMContentLoaded", function() {
+  let currentpage = 1; 
+  let rowsPerPage = 5; 
+  
 
+  const paginationContainer = document.getElementById("paginationcontrol");
+  const paginationSelect = document.getElementById("pagination");
+  const totalLabel = document.getElementById("total");
 
-// Fetch employee data and populate the table
-async function fetchdata() {
-  try {
-    let response = await fetch("http://localhost:3000/employees");
-    let data = await response.json();
-    console.log("Fetched data:", data);
+  // Fetch employee data and populate the table
+  async function fetchdata() {
+    try {
+      let response = await fetch("http://localhost:3000/employees");
+      employees = await response.json();
+      console.log("Fetched data:", employees);
 
-    let table_body = document.querySelector(".table_body");
-    let row = "";
+      // Calculate total rows and total pages
+      const totalRows = employees.length;
+      const totalPages = Math.ceil(totalRows / rowsPerPage);
 
-    data.forEach((element, index) => {
-      row += `<tr>
-                <td id='userId' hidden>${element.id}</td>
-                <td>#0${index + 1}</td>
-                <td>${element.salutation} ${element.firstName} ${element.lastName}</td>
-                <td>${element.email}</td>
-                <td>${element.phone}</td>
-                <td>${element.gender}</td>
-                <td>${element.dob}</td>
-                <td>${element.country}</td>
-                <td>
-                    <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle bg-white" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa-solid fa-ellipsis text-black"></i>
-                        </button>
-                          
-                         <ul id="dotmenu" class="dropdown-menu  rounded-6">
-                            <li><button id="viewDetails" class="dropdown-item px-1" type="button"><i class="fa-regular px-2 fa-eye"></i>View Details </button></li>
+      // Update the "of X" total label
+      totalLabel.innerHTML = `of ${totalPages}`;
+
+      // Paginate the data
+      const startIndex = (currentpage - 1) * rowsPerPage;
+      const endIndex = startIndex + rowsPerPage;
+      const paginatedData = employees.slice(startIndex, endIndex);
+
+      // Generate rows for the table
+      let table_body = document.querySelector(".table_body");
+      let row = "";
+
+      paginatedData.forEach((element, index) => {
+        row += `<tr>
+                  <td id='userId' hidden>${element.id}</td>
+                  <td>#0${index + 1}</td>
+                  <td><img class="profile-img" src="http://localhost:3000/employees/${element.id}/avatar"
+                  <td>${element.salutation} ${element.firstName} ${element.lastName}</td>
+                  <td>${element.email}</td>
+                  <td>${element.phone}</td>
+                  <td>${element.gender}</td>
+                  <td>${element.dob}</td>
+                  <td>${element.country}</td>
+                  <td>
+                      <div class="dropdown">
+                          <button class="btn btn-secondary dropdown-toggle bg-white" type="button"
+                                  data-bs-toggle="dropdown" aria-expanded="false">
+                                  <i class="fa-solid fa-ellipsis text-black"></i>
+                          </button>
+                            
+                           <ul id="dotmenu" class="dropdown-menu  rounded-6">
+                           <button  id="viewDetails" class="dropdown-item px-1" type="button"   onclick="view_button('${element.id}')"><i class="fa-regular px-2 fa-eye"></i>View Details</button>
                             <button id="edit" onclick="openEditModal('${element.id}')" class="dropdown-item px-1" type="button"><i class="fa-solid px-2 fa-pen"></i>Edit</button>
                            <li><button id="delete" class="dropdown-item px-1"  type="button"  onclick="deleteEmployee('${element.id}')"> <i class="fa-regular px-2 fa-trash-can"></i>Delete </button></li>
                          </ul>
-                    </div>
-                </td>
-            </tr>`;
-    });
+                      </div>
+                  </td>
+              </tr>`;
+      });
 
-    table_body.innerHTML = row;
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    let table_body = document.querySelector(".table_body");
-    table_body.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Failed to load data</td></tr>`;
+      table_body.innerHTML = row;
+
+      // Update pagination controls
+      updatePagination();
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      let table_body = document.querySelector(".table_body");
+      table_body.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Failed to load data</td></tr>`;
+    }
   }
-}
 
-fetchdata();
+  // Function to update pagination controls
+  function updatePagination() {
+    const totalRows = employees.length;
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+    // Check if pagination container exists
+    if (!paginationContainer) {
+      console.error("Pagination container not found");
+      return;
+    }
+
+    // Clear existing pagination
+    paginationContainer.innerHTML = '';
+
+    // Create previous button
+    const prevButton = document.createElement("button");
+    prevButton.classList.add("pagination-button");
+    prevButton.textContent = "Previous";
+    prevButton.disabled = currentpage === 1;
+    prevButton.addEventListener("click", () => {
+      if (currentpage > 1) {
+        currentpage--;
+        fetchdata();
+      }
+    });
+    paginationContainer.appendChild(prevButton);
+
+    // Create page buttons
+    for (let i = 1; i <= totalPages; i++) {
+      const pageButton = document.createElement("button");
+      pageButton.classList.add("pagination-button");
+      pageButton.textContent = i;
+      pageButton.addEventListener("click", () => {
+        currentpage = i;
+        fetchdata();
+      });
+      if (i === currentpage) {
+        pageButton.classList.add("active");
+      }
+      paginationContainer.appendChild(pageButton);
+    }
+
+    // Create next button
+    const nextButton = document.createElement("button");
+    nextButton.classList.add("pagination-button");
+    nextButton.textContent = "Next";
+    nextButton.disabled = currentpage === totalPages;
+    nextButton.addEventListener("click", () => {
+      if (currentpage < totalPages) {
+        currentpage++;
+        fetchdata();
+      }
+    });
+    paginationContainer.appendChild(nextButton);
+  }
+
+  // Event listener for changing rows per page from dropdown
+  paginationSelect.addEventListener("change", function() {
+    rowsPerPage = parseInt(paginationSelect.value);
+    currentpage = 1; 
+    fetchdata();
+  });
+
+  fetchdata(); 
+});
+
 
 
 let modal = new bootstrap.Modal(document.getElementById('modalAdd'));
@@ -57,8 +147,8 @@ function addemployee() {
 }
 
 function closeAndResetForm() {
-  closeFormModal();  // Close the modal
-  resetForm();       // Reset the form
+  closeFormModal();  
+  resetForm();      
 }
 
 // Close modal function
@@ -94,6 +184,7 @@ const setSuccess = (element) => {
 
 // Validate input fields
 const validate = () => {
+  // const image = document.getElementById("input_img");
   const salutation = document.getElementById('input_salutation');
   console.log(salutation.value);
   const firstname = document.getElementById('input_fname');
@@ -273,6 +364,8 @@ const validate = () => {
   } else {
     setSuccess(password);
   }
+// img validation
+
 
 
   return isValid;
@@ -283,13 +376,14 @@ const validate = () => {
 // Save employee data
 async function saveEmployee() {
   if (!validate()) return;
-
+  // const image = document.getElementById("input_img").value;
   const salutation = document.getElementById('input_salutation').value;
   const firstName = document.getElementById('input_fname').value;
   const lastName = document.getElementById('input_lname').value;
   const email = document.getElementById('input_email').value;
   const phone = document.getElementById('input_phone').value;
   const dob = document.getElementById('input_dob').value;
+  
   var dataofbith = changeformat(dob)
   function changeformat(val) {
     let array = val.split("-");
@@ -330,29 +424,97 @@ async function saveEmployee() {
   };
 
 
-  // 
-  fetch("http://localhost:3000/employees", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(newEmployee),
-  })
-    .then(response => response.json())
-    .then(data => {
-      console.log('success', data)
-    let formdata=   new FormData()
-    formdata.append("avatar", document.getElementById('input_img').files[0]);
 
-      fetch(`http://localhost:3000/employees/${data.Id}/avatar`,{
+  if(edit!=1){
+    fetch("http://localhost:3000/employees", {
       method: "POST",
-      body: formdata,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newEmployee),
     })
-  })
-    .catch((error) => {
-      console.error('error saving employee', error);
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Failed to create employee');
+        }
+      })
+      .then(data => {
+        console.log('Success:', data);
+        let formdata=   new FormData()
+formdata.append("avatar", document.getElementById('input_img').files[0]);
+
+  fetch(`http://localhost:3000/employees/${data.Id}/avatar`,{
+  method: "POST",
+  body: formdata,
+})
+      })
+      .catch((error) => {
+        console.error('Error saving employee:', error);
+      });
+  } else {
+    fetch(`http://localhost:3000/employees/${editDataId }`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newEmployee),
     })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Failed to update employee');
+        }
+      })
+      .then(data => {
+        console.log('Success:', data);
+      })
+      .catch(error => {
+        console.error('Error updating employee details:', error);
+      });
+  }
+  
 }
 
 
+
 document.getElementById("save_changes").addEventListener("click", saveEmployee);
+
+
+
+// search
+
+// Function to filter table rows
+function filterTableRows() {
+  const query = document.getElementById("search_bar").value.toLowerCase(); 
+  const tableBody = document.querySelector(".table_body"); 
+  const rows = tableBody.getElementsByTagName("tr"); 
+
+  // Iterate over each row
+  for (let i = 0; i < rows.length; i++) {
+    const name = rows[i].children[2].textContent.toLowerCase(); 
+    const phone = rows[i].children[4].textContent.toLowerCase(); 
+
+    // Check if search query matches Name or Phone
+    if (name.includes(query) || phone.includes(query)) {
+      rows[i].style.display = ""; 
+    } else {
+      rows[i].style.display = "none"; 
+    }
+  }
+}
+
+// Attach search functionality to the input field
+document.getElementById("search_bar").addEventListener("input", filterTableRows);
+
+
+function view_button(employeeId) {
+  const url = "/indexview.html?";
+  const obj = {
+    id: employeeId, 
+  };
+
+  const searchParams = new URLSearchParams(obj);
+  const queryString = searchParams.toString();
+  window.location.href = url + queryString;
+}
 
 

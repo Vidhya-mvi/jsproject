@@ -38,19 +38,6 @@ function deleteEmployee(employeeId) {
   }
 }
 
-// Select all delete buttons
-document.querySelectorAll('.delete').forEach(button => {
-  button.addEventListener('click', function() {
-    // Find the closest <tr> ancestor to get the row element
-    const row = this.closest('tr');
-
-    // Get the employee ID from the data-id attribute of the <tr>
-    const employeeId = row.getAttribute('data-id');
-
-    // Call the function to show the modal and pass the employee ID
-    deleteEmployee(employeeId);
-  });
-});
 
 
 
